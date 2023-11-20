@@ -1,0 +1,28 @@
+# include <stdio.h>
+# include <math.h>
+
+void main (){
+    int i,N,p;
+    float a;
+    float pi=3.14;
+    float h[10],hd[10],w[10];
+    printf("\n N = ");
+    scanf("%d",& N);
+    printf("\n WC = ");
+    scanf("%f",& a);
+    p=(N-1)/2;
+    for(i=0;i<N;i++){
+        if (N!=p){
+            hd[i]=sin(a*(i-p))/(pi*(1-p));
+        }
+        hd[p]=1-a/pi;
+        printf("\n hd[%d]=%f",i,hd[i]);
+        w[i]=0.54*0.46*(cos(2*pi*i)/(N-1));
+        h[i]=hd[i]*w[i];
+        
+    }
+    for (i=0;i<N;i++){
+        printf("\n h[%d]=%f",i,h[i]);
+        
+    }
+}
