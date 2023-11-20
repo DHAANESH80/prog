@@ -1,0 +1,18 @@
+#include<stdio.h>
+#include<math.h>
+int y[10];
+main()
+{ int m=4; /*Lenghth of i/p sequence*/
+int n=4; /*Lenghth of impulse response */
+int i=0,j;
+int x[10]={1,1,1,2}; /*Input Sequence Samples*/
+int h[10]={1,4,3,5}; /*Impulse Response Samples*/
+for(i=0;i<m+n-1;i++)
+{
+y[i]=0;
+for(j=0;j<=i;j++)
+y[i]+=x[j]*h[i-j];
+}
+for(i=0;i<m+n-1;i++)
+printf("%d\n",y[i]);
+}
