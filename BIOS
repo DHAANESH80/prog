@@ -1,0 +1,27 @@
+#include <stdio.h>
+#include "dsk6713.h"
+#include "dsk6713_led.h"
+#include "dsk6713_dip.h"
+unsigned int SW;
+int main(void)
+{
+DSK6713_init();
+DSK6713_LED_init();
+DSK6713_DIP_init();
+while(1){
+SW = DSK6713_DIP_get(0);
+if(SW)
+{
+DSK6713_LED_on(0);
+}else
+{
+DSK6713_LED_off(0);
+}
+DSK6713_LED_on(3);
+DSK6713_waitusec(1000000);
+DSK6713_LED_off(3);
+DSK6713_waitusec(1000000);
+DSK6713_LED_toggle(2);
+}
+return 0;
+}
