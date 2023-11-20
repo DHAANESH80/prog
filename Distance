@@ -1,0 +1,82 @@
+#include <LPC214X.H>
+//#include <stdio.h>
+unsigned char flag=0;
+__irq void mycapture()
+{
+flag=1;
+T0IR=T0IR;
+VICVectAddr=0;
+}
+int main(void)
+{
+unsigned int A =0;
+float distanceCM=0;
+//creation of trigger pulse using PWM
+PINSEL0=(1<<15)|(1<<5)|(1<<9);
+IO0DIR=(1<<7); /// PWM2 CHANNEL AS PWM OUTPUT at p0.7 --- cap0.0 at p0.2 Rising edge --cap
+0.1 at p0.4 Falling edge
+IO1DIR=(1<<16); /// Output in LED16 On (P1.16)
+IO1CLR=(1<<16); /// Output cleared LED Off
+// intialization of capture module cap0.0 for rising edge and cap0.1 for falling edge
+T0TCR=0x03; ///Timer Control register used to control the timer control functions. We’ll
+enable(01), disable(02) and
+///reset (03) Timer Counter (TC)
+through this register
+T0PR=14; /// Sets Maximum value of prescale register
+T0CTCR=0; ///Count Control Register:selects Timer Mode-every rising PCLK edge can
+increment Timer’s Prescale Counter (PC)
+///or clear PC and increment Timer Counter
+(TC)
+T0CCR=(1<<0)|(1<<4)|(1<<5); // RISING EDGE ON CAP0.0 ----/FALLING EDGE ON CAP0.1
+T0CR0=0; ///Timer 0 capture register 0 set to 0
+T0CR1=0; ///Timer 0 capture register 1 set to 0
+T0TCR=0x01; /// Timer Control register enabled - control time functions
+VICVectAddr0=(unsigned)mycapture; /// Sets capture vector address
+VICVectCntl0=0X24; /// Sets the channel
+VICIntEnable=(1<<4); /// Enable Timer0 Interrupt
+////creation of trigger pulse using PWM
+PWMPR =14; /// set the resolution of the PWM outputs. The PWM TC will increment for every
+PWMPR + 1 PCLK cycles.
+ PWMMCR =0X02; /// control the operations when PWMMR=PWMTC
+// Bit 0 in PWMMCR enable an interrupt, Bit
+1 is used to reset the PWM TC and Bit 2 is used to stop the PWM TC and PWM PC
+PWMMR0 = 40000; // Values stored in this register is continuously compared with PWMTC
+value
+PWMMR1 = 1000; // RISING EDGE 1 ms period duration
+PWMMR2 = 1010; // FALLING EDGE 10us ulse duration
+PWMLER=0X07; // LATCH ENABLE FOR SHADOWING REGISTER
+PWMTCR = 0X03; // PWM enable Set PWMMR0 before enabling TCR in prder to match or
+compare both
+PWMPCR =0X04|(1<<10); //Selects double edge controlled mode for the PWM2 output
+ PWMTCR = 0X09; // Enable PWM and counter
+T0TCR=0x01; /// Timer Control register enabled - control time functions
+ while(1)
+{
+if (flag==1)
+{
+ A= T0CR1 - T0CR0; // Finding the pulse duration between the Timer 0 control registers
+if ( A > 38000)
+{
+//printf(" no object in the vicinity ");
+T0TCR=0x03;
+T0TCR=0x01;
+ }
+ else
+{
+T0TCR=0x03;
+ distanceCM=(A*0.034)/2;
+//printf("distance");
+if (distanceCM>10)
+{
+ IO1SET=(1<<16);
+ }
+else
+{
+ IO1CLR=(1<<16);
+ }
+T0TCR=0x01;
+ }
+flag=0;
+}
+ }
+}
